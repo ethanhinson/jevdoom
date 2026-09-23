@@ -11,10 +11,10 @@ from pathlib import Path
 
 from typesafe_sdk import Choice, Noul, RetryPolicy, TypeSafeClient
 
+from jevcommon import cost
+
 from .describe import Described, enemy_summary, pickup_summary
 from .game import Capabilities, Snapshot
-
-PRICE_PER_TOKEN = 0.042 / 1_000_000  # jev-1.13 list price, input tokens only
 
 MODE_DESCRIPTIONS = {
     "fight": {
@@ -171,7 +171,7 @@ class Brain:
         return decision
 
     def cost_usd(self) -> float:
-        return self.input_tokens * PRICE_PER_TOKEN
+        return cost.usd(self.input_tokens)
 
     def close(self) -> None:
         with self._lock:

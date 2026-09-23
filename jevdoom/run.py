@@ -9,6 +9,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from jevcommon import jeview
+
 from .brain import Brain, Decision
 from .control import choose_buttons, resolve_target
 from .describe import describe, enemy_summary
@@ -16,7 +18,6 @@ from .game import SCENARIOS, DoomSession
 
 TICS_PER_SECOND = 35
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-JEVIEW_URL = "http://127.0.0.1:4777"
 JEVIEW_LABEL = "jevdoom"
 
 
@@ -33,22 +34,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--skill", type=int, default=None, help="Doom skill 1-5 (scenario default)")
     parser.add_argument("--model", default=None, help="TypeSafe model name (SDK default if omitted)")
     parser.add_argument("--log-dir", default=str(PROJECT_ROOT / "logs"))
-    parser.add_argument(
-        "--jeview",
-        nargs="?",
-        const=JEVIEW_URL,
-        default=None,
-        metavar="URL",
-        help=f"send Jev calls through a running Jeview so they show on its live map (default {JEVIEW_URL})",
-    )
+    jeview.add_argument(parser)
     return parser.parse_args(argv)
-
-
-def jeview_base_url(jeview: str | None) -> str | None:
-    """The SDK base URL that routes calls through Jeview, grouped under this project's label."""
-    if jeview is None:
-        return None
-    return f"{jeview.rstrip('/')}/{JEVIEW_LABEL}"
 
 
 def status_line(tic: int, decision: Decision, snap) -> str:
@@ -127,7 +114,7 @@ def main(argv: list[str] | None = None) -> None:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     log_path = Path(args.log_dir) / f"{args.scenario}-{stamp}.jsonl"
     session = DoomSession(args.scenario, window=not args.no_window, skill=args.skill)
-    brain = Brain(log_path, model=args.model, base_url=jeview_base_url(args.jeview))
+    brain = Brain(log_path, model=args.model, base_url=jeview.base_url(args.jeview, JEVIEW_LABEL))
     print(f"scenario={args.scenario} buttons={[b.name for b in session.buttons]} log={log_path}")
     if args.jeview:
         print(f"jeview: calls go through {args.jeview}, watch them at {args.jeview}/")
