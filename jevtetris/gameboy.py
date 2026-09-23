@@ -11,7 +11,7 @@ from .board import ROTATIONS, WIDTH, Board, Cell, Game, Placement, empty_board
 GB_HEIGHT = 18
 BLANK = 47  # the empty tile in the play field
 DEAD = 135  # the black tile the game fills the field with when it is over
-SPAWN_ROWS = 2  # a new piece appears within the top rows
+SPAWN_ROWS = 3  # a new piece appears in rows 1 and 2
 
 FRAMES_PER_INPUT = 3  # press for one frame, then let the game see the release
 LOCK_TIMEOUT_FRAMES = 60 * 8  # a piece that has not locked in this long means the plan went wrong
@@ -33,6 +33,18 @@ def identify(cells: set[Cell]) -> tuple[str, int] | None:
             if known == shape:
                 return piece, rotation
     return None
+
+
+def complete(cells: set[Cell]) -> set[Cell]:
+    """A piece turned upright at the top can poke one cell above the visible field. If three cells
+    are showing and one hidden cell just above the top row would make a tetromino, add it."""
+    if len(cells) != 3 or min(r for r, _ in cells) != 0:
+        return cells
+    for _, c in cells:
+        candidate = cells | {(-1, c)}
+        if identify(candidate) is not None:
+            return candidate
+    return cells
 
 
 def cells_of(area) -> set[Cell]:
@@ -89,7 +101,7 @@ class GameBoyTetris:
 
     def falling(self) -> Falling | None:
         """The piece in flight: the filled cells that are not part of the locked board."""
-        loose = cells_of(self.area()) - board_cells(self.locked)
+        loose = complete(cells_of(self.area()) - board_cells(self.locked))
         found = identify(loose)
         if found is None:
             return None
@@ -101,12 +113,13 @@ class GameBoyTetris:
         return not self.closed
 
     def wait_for_piece(self, timeout_frames: int = LOCK_TIMEOUT_FRAMES) -> Falling | None:
-        """Tick until a new piece is in the spawn rows, or the game ends."""
+        """Tick until a falling piece can be made out (line clears blank the field for a while),
+        or the game ends."""
         for _ in range(timeout_frames):
             if self.over():
                 return None
             piece = self.falling()
-            if piece is not None and all(r < SPAWN_ROWS for r, _ in piece.cells):
+            if piece is not None:
                 return piece
             if not self.tick():
                 return None

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
@@ -54,6 +55,7 @@ def play(brain: Brain, view, bag: Bag, executor: ThreadPoolExecutor, max_pieces:
 
 def main(argv: list[str] | None = None) -> None:
     load_dotenv(PROJECT_ROOT / ".env")
+    sys.stdout.reconfigure(line_buffering=True)  # status lines show up live even when redirected
     args = parse_args(argv)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     log_path = Path(args.log_dir) / f"tetris-{stamp}.jsonl"

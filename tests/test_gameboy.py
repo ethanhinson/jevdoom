@@ -1,5 +1,5 @@
 from jevtetris.board import ROTATIONS, Game, placements
-from jevtetris.gameboy import BLANK, GB_HEIGHT, board_cells, board_from, cells_of, identify
+from jevtetris.gameboy import BLANK, GB_HEIGHT, board_cells, board_from, cells_of, complete, identify
 
 
 def test_identify_every_orientation_of_every_piece():
@@ -35,3 +35,13 @@ def test_game_boy_game_has_no_hold_and_an_18_row_board():
     assert all(m.placement.landing_height == 1 for m in moves)
     floor = placements(board, "I")
     assert all(p.board[-1].count("I") == 4 for p in floor if p.rotation == 0)
+
+
+def test_a_piece_poking_above_the_field_is_completed():
+    upright_i = {(0, 4), (1, 4), (2, 4)}  # the fourth cell is above the screen
+    assert complete(upright_i) == {(-1, 4), (0, 4), (1, 4), (2, 4)}
+    assert identify(complete(upright_i)) == ("I", 1)
+    l_on_its_side = {(0, 3), (0, 4), (1, 3)}  # a J or L minus its top cell
+    completed = complete(l_on_its_side)
+    assert len(completed) == 4 and identify(completed) is not None
+    assert complete({(5, 5), (6, 5), (7, 5)}) == {(5, 5), (6, 5), (7, 5)}  # not at the top: unchanged

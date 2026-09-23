@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -110,6 +111,7 @@ def play_episode(session: DoomSession, brain: Brain, args: argparse.Namespace) -
 
 def main(argv: list[str] | None = None) -> None:
     load_dotenv(PROJECT_ROOT / ".env")
+    sys.stdout.reconfigure(line_buffering=True)  # status lines show up live even when redirected
     args = parse_args(argv)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     log_path = Path(args.log_dir) / f"{args.scenario}-{stamp}.jsonl"

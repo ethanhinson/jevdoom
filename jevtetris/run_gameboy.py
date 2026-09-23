@@ -33,6 +33,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> None:
     load_dotenv(PROJECT_ROOT / ".env")
+    sys.stdout.reconfigure(line_buffering=True)  # status lines show up live even when redirected
     args = parse_args(argv)
     if not Path(args.rom).is_file():
         sys.exit(f"no ROM at {args.rom}: put your Tetris (Game Boy) ROM there or pass --rom")
