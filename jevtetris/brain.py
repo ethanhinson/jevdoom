@@ -20,7 +20,7 @@ PLACEMENT_INSTRUCTIONS = (
     "`held_piece` and `next_pieces`? Judge the board each option leaves behind: clearing lines is "
     "good, especially several at once; new holes are bad because they block future clears; a low, "
     "flat stack is safer; one deep well on an edge is worth keeping for the I piece. Options starting "
-    "with 'hold' play the alternate piece instead, as `hold_rule` explains."
+    "with 'hold', when there are any, play the alternate piece instead, as `hold_rule` explains."
 )
 
 

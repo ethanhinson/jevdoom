@@ -6,3 +6,4 @@ logs/
 _vizdoom.ini
 .pytest_cache/
 .ruff_cache/
+roms/

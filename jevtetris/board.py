@@ -59,18 +59,23 @@ def shape_rows(cells: tuple[Cell, ...]) -> list[str]:
     return ["".join(row) for row in grid]
 
 
-Board = tuple[str, ...]  # HEIGHT rows of WIDTH chars, "." empty or a piece letter; row 0 is the top
+Board = tuple[str, ...]  # rows of WIDTH chars, "." empty or a piece letter; row 0 is the top
 
-EMPTY_BOARD: Board = tuple("." * WIDTH for _ in range(HEIGHT))
+
+def empty_board(height: int = HEIGHT) -> Board:
+    return tuple("." * WIDTH for _ in range(height))
+
+
+EMPTY_BOARD: Board = empty_board()
 
 
 def column_heights(board: Board) -> list[int]:
     heights = []
     for col in range(WIDTH):
         height = 0
-        for row in range(HEIGHT):
+        for row in range(len(board)):
             if board[row][col] != ".":
-                height = HEIGHT - row
+                height = len(board) - row
                 break
         heights.append(height)
     return heights
@@ -81,7 +86,7 @@ def count_holes(board: Board) -> int:
     holes = 0
     for col in range(WIDTH):
         covered = False
-        for row in range(HEIGHT):
+        for row in range(len(board)):
             if board[row][col] != ".":
                 covered = True
             elif covered:
@@ -105,7 +110,7 @@ def deepest_well(heights: list[int]) -> int:
 def fits(board: Board, cells: tuple[Cell, ...], row: int, col: int) -> bool:
     for r, c in cells:
         rr, cc = row + r, col + c
-        if cc < 0 or cc >= WIDTH or rr < 0 or rr >= HEIGHT or board[rr][cc] != ".":
+        if cc < 0 or cc >= WIDTH or rr < 0 or rr >= len(board) or board[rr][cc] != ".":
             return False
     return True
 
@@ -121,7 +126,7 @@ def place(board: Board, piece: str, cells: tuple[Cell, ...], row: int, col: int)
     for r, c in cells:
         grid[row + r][col + c] = piece
     kept = [line for line in grid if "." in line]
-    cleared = HEIGHT - len(kept)
+    cleared = len(board) - len(kept)
     kept = [["."] * WIDTH for _ in range(cleared)] + kept
     return tuple("".join(line) for line in kept), cleared
 
@@ -150,7 +155,7 @@ class Placement:
     @property
     def landing_height(self) -> int:
         """Rows from the floor to the lowest cell of the piece, 1 = resting on the floor."""
-        return HEIGHT - (self.row + max(r for r, _ in self.cells))
+        return len(self.board) - (self.row + max(r for r, _ in self.cells))
 
 
 def placements(board: Board, piece: str) -> list[Placement]:
@@ -233,6 +238,7 @@ class Game:
     lines: int = 0
     pieces: int = 0
     over: bool = False
+    can_hold: bool = True
 
     @classmethod
     def new(cls, bag: Bag) -> Game:
@@ -251,6 +257,8 @@ class Game:
 
     def moves(self) -> list[Move]:
         now = [Move(p, hold=False) for p in placements(self.board, self.current)]
+        if not self.can_hold:
+            return now
         held = [Move(p, hold=True) for p in placements(self.board, self.alternate)]
         return now + held
 

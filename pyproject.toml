@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Jev (TypeSafe System One) plays games: Doom and Tetris"
 requires-python = ">=3.12"
 dependencies = [
+    "pillow>=12.3.0",
+    "pyboy>=2.7.0",
     "pygame>=2.6.1",
     "python-dotenv>=1.2.3",
     "typesafe-sdk>=0.7.1",
@@ -19,6 +21,7 @@ dev = [
 [project.scripts]
 jevdoom = "jevdoom.run:main"
 jevtetris = "jevtetris.run:main"
+jevgameboy = "jevtetris.run_gameboy:main"
 
 [tool.ruff]
 line-length = 110

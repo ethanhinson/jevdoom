@@ -63,7 +63,9 @@ def describe_state(game: Game) -> dict:
             f"Options starting with 'hold' put the current piece in hold and play "
             f"{PIECE_NAMES[game.alternate]} instead"
             + ("" if game.hold else " (the next piece, since nothing is held yet)")
-        ),
+        )
+        if game.can_hold
+        else "This game has no hold; the current piece must be played.",
         "score": game.score,
         "lines": game.lines,
         "level": game.level,
